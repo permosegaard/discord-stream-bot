@@ -105,7 +105,7 @@ ipcMain.on("stream-input", (event) => {
 });
 
 ipcMain.on("stream-bytes", (event, page) => {
-	global_discord_readable_stream.push(page);
+	global_discord_readable_stream.push(page.slice(0));
 
-	global_icecast_client.write(page);
+	global_icecast_client.write(page.slice(0));
 });
