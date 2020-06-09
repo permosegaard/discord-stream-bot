@@ -6,13 +6,7 @@ const Discord = require("discord.js");
 
 const Icecast = require("icecast-source");
 
-
-const DISCORD_TOKEN = "";
-const DISCORD_CHANNEL_ID = "";
-
-const ICECAST_PORT = 9000;
-const ICECAST_PASS = "";
-const ICECAST_MOUNT = "/blah";
+const config = require("./config.js");
 
 
 let global_window;
@@ -56,18 +50,33 @@ app.on("window-all-closed", () => {
 })
 
 ipcMain.on("init", (event) => {
-	if (DISCORD_TOKEN == "") { fatal("NO TOKEN SUPPLIED, REBUILD REQUIRED"); }
+	const configs = [
+		config.DISCORD_TOKEN,
+		config.DISCORD_CHANNEL_ID,
+		config.ICECAST_HOST,
+		config.ICECAST_PORT,
+		config.ICECAST_PASS,
+		config.ICECAST_MOUNT
+	];
 
-	/*global_icecast_client = new Icecast({
-		port: ICECAST_PORT,
-		pass: ICECAST_PASS,
-		mount: ICECAST_MOUNT
-	}, (err) => { fatal(err); });*/
+	for (const config of configs) {
+		if (config == "") { fatal("invalid config, check and rerun"); }
+	}
+
+
+	global_icecast_client = new Icecast({
+		host: config.ICECAST_HOST,
+		port: config.ICECAST_PORT,
+		pass: config.ICECAST_PASS,
+		password: config.ICECAST_PASS,
+		mount: config.ICECAST_MOUNT
+	}, (err) => { if (err) { fatal(err); } });
+
 
 	global_discord_client = new Discord.Client();
 
 	global_discord_client.once("ready", async () => {
-		global_discord_channel = global_discord_client.channels.cache.get(DISCORD_CHANNEL_ID);
+		global_discord_channel = global_discord_client.channels.cache.get(config.DISCORD_CHANNEL_ID);
 		global_discord_connection = await global_discord_channel.join();
 
 		global_discord_client.on("message", message => {
@@ -77,7 +86,7 @@ ipcMain.on("init", (event) => {
 		});
 	});
 
-	global_discord_client.login(DISCORD_TOKEN);
+	global_discord_client.login(config.DISCORD_TOKEN);
 });
 
 ipcMain.on("stream-input", (event) => {
@@ -97,5 +106,5 @@ ipcMain.on("stream-input", (event) => {
 ipcMain.on("stream-bytes", (event, page) => {
 	global_discord_readable_stream.push(page);
 
-	//global_icecast_client.write(page);
+	global_icecast_client.write(page);
 });
