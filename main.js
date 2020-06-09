@@ -12,14 +12,32 @@ function init() {
 		ipcRenderer.send("stream-input");
 
 		recorder = new Recorder({
-			numberOfChannels: 2,
-			encoderSampleRate: 48000,
 			streamPages: true,
+			bufferLength: 2**14,
+
+			recordingGain: 0.9,
+
+			resampleQuality: 10,
+			encoderComplexity: 10,
+
+			bitRate: 128000,
+			sampleRate: 48000,
+			encoderSampleRate: 48000,
+			numberOfChannels: 2,
+
 			encoderPath: "./node_modules/opus-recorder/dist/encoderWorker.min.js"
 		});
 
 		navigator.mediaDevices.getUserMedia({
-			audio: { deviceId: value }
+			audio: {
+				deviceId: value,
+
+				channelCount: 2,
+				sampleRate: 48000,
+
+				autoGainControl: false,
+				noiseSuppression: false
+			}
 		}).then((stream) => {
 			const context = new AudioContext();
 			const source = context.createMediaStreamSource(stream);

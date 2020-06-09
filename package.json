@@ -21,6 +21,7 @@
 	"dependencies": {
 		"discord.js": "*",
 		"opusscript": "*",
-		"opus-recorder": "*"
+		"opus-recorder": "*",
+		"icecast-source": "*"
 	}
 }

@@ -4,75 +4,98 @@ const { app, BrowserWindow, ipcMain } = require("electron");
 
 const Discord = require("discord.js");
 
-
-const TOKEN = "";
-
-const CHANNEL_NAME = "";
+const Icecast = require("icecast-source");
 
 
-let window;
-let client;
-let channel;
-let connection;
-let dispatcher;
-let readable_stream;
+const DISCORD_TOKEN = "";
+const DISCORD_CHANNEL_ID = "";
+
+const ICECAST_PORT = 9000;
+const ICECAST_PASS = "";
+const ICECAST_MOUNT = "/blah";
+
+
+let global_window;
+
+let global_icecast_client;
+
+let global_discord_client;
+let global_discord_channel;
+let global_discord_connection;
+let global_discord_dispatcher;
+let global_discord_readable_stream;
+
+
+
+function fatal(message) {
+	dialog.showMessageBoxSync({ type: "error", message: message });
+
+	global_window.close();
+}
 
 
 app.on("ready", () => {
-	window = new BrowserWindow({
-		width: 1024,
-		height: 768,
+	global_window = new BrowserWindow({
+		width: 500,
+		height: 200,
 
 		webPreferences: {
 			nodeIntegration: true
 		}
 	})
 
-	window.setMenuBarVisibility(false);
-	window.loadFile("./main.html");
+	global_window.setMenuBarVisibility(false);
+	global_window.loadFile("./main.html");
 
-	//window.webContents.openDevTools();
-
+	//global_window.webContents.openDevTools();
 });
 
 app.on("window-all-closed", () => {
-	if (channel !== undefined) { channel.leave(); }
+	if (global_channel !== undefined) { global_channel.leave(); }
 	app.quit();
 })
 
 ipcMain.on("init", (event) => {
-	if (TOKEN == "") {
-		dialog.showMessageBoxSync({ type: "error", message: "NO TOKEN SUPPLIED, REBUILD REQUIRED" });
+	if (DISCORD_TOKEN == "") { fatal("NO TOKEN SUPPLIED, REBUILD REQUIRED"); }
 
-		window.close();
-	}
+	/*global_icecast_client = new Icecast({
+		port: ICECAST_PORT,
+		pass: ICECAST_PASS,
+		mount: ICECAST_MOUNT
+	}, (err) => { fatal(err); });*/
 
-	client = new Discord.Client();
+	global_discord_client = new Discord.Client();
 
-	client.once("ready", async () => {
-		channel = client.channels.cache.get(CHANNEL_NAME);
-		connection = await channel.join();
+	global_discord_client.once("ready", async () => {
+		global_discord_channel = global_discord_client.channels.cache.get(DISCORD_CHANNEL_ID);
+		global_discord_connection = await global_discord_channel.join();
 
-		client.on("message", message => {
+		global_discord_client.on("message", message => {
 			if (message.content === "!ping") {
 				message.channel.send("Pong.");
 			}
 		});
 	});
 
-	client.login(TOKEN);
+	global_discord_client.login(DISCORD_TOKEN);
 });
 
 ipcMain.on("stream-input", (event) => {
-	readable_stream = new Readable({
+	global_discord_readable_stream = new Readable({
 		read() {}
 	});
 
-	if (dispatcher !== undefined) { dispatcher.destroy(); }
+	if (global_discord_dispatcher !== undefined) {
+		global_discord_dispatcher.destroy();
+	}
 
-	dispatcher = connection.play(readable_stream, { type: "ogg/opus" });
+	global_discord_dispatcher = global_discord_connection.play(
+		global_discord_readable_stream, { type: "ogg/opus" }
+	);
 });
 
 ipcMain.on("stream-bytes", (event, page) => {
-	readable_stream.push(page);
+	global_discord_readable_stream.push(page);
+
+	//global_icecast_client.write(page);
 });
