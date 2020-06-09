@@ -11,7 +11,8 @@
 		"files": [
 			"index.js",
 			"main.html",
-			"main.js"
+			"main.js",
+			"config.js"
 		]
 	},
 	"devDependencies": {

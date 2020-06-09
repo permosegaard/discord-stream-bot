@@ -45,7 +45,7 @@ app.on("ready", () => {
 });
 
 app.on("window-all-closed", () => {
-	if (global_channel !== undefined) { global_channel.leave(); }
+	if (global_discord_channel !== undefined) { global_discord_channel.leave(); }
 	app.quit();
 })
 
@@ -69,7 +69,8 @@ ipcMain.on("init", (event) => {
 		port: config.ICECAST_PORT,
 		pass: config.ICECAST_PASS,
 		password: config.ICECAST_PASS,
-		mount: config.ICECAST_MOUNT
+		mount: config.ICECAST_MOUNT,
+		"type": "audio/ogg"
 	}, (err) => { if (err) { fatal(err); } });
 
 
