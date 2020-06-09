@@ -1,0 +1,26 @@
+{
+	"name": "discord-stream-bot",
+	"version": "1.0.0",
+	"description": "",
+	"main": "index.js",
+	"scripts": {
+		"start": "electron .",
+		"dist": "electron-builder"
+	},
+	"build": {
+		"files": [
+			"index.js",
+			"main.html",
+			"main.js"
+		]
+	},
+	"devDependencies": {
+		"electron": "^9.0.3",
+		"electron-builder": "*"
+	},
+	"dependencies": {
+		"discord.js": "*",
+		"opusscript": "*",
+		"opus-recorder": "*"
+	}
+}
