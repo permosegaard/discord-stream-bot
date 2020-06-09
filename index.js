@@ -1,3 +1,4 @@
+const { dialog } = require("electron");
 const { Readable } = require("stream");
 const { app, BrowserWindow, ipcMain } = require("electron");
 
@@ -5,7 +6,6 @@ const Discord = require("discord.js");
 
 
 const TOKEN = "";
-if (TOKEN == "") { alert("NO TOKEN SUPPLIED, REBUILD REQUIRED"); }
 
 const CHANNEL_NAME = "";
 
@@ -28,10 +28,11 @@ app.on("ready", () => {
 		}
 	})
 
-	//window.setMenuBarVisibility(false);
+	window.setMenuBarVisibility(false);
 	window.loadFile("./main.html");
 
-	window.webContents.openDevTools();
+	//window.webContents.openDevTools();
+
 });
 
 app.on("window-all-closed", () => {
@@ -40,6 +41,12 @@ app.on("window-all-closed", () => {
 })
 
 ipcMain.on("init", (event) => {
+	if (TOKEN == "") {
+		dialog.showMessageBoxSync({ type: "error", message: "NO TOKEN SUPPLIED, REBUILD REQUIRED" });
+
+		window.close();
+	}
+
 	client = new Discord.Client();
 
 	client.once("ready", async () => {
